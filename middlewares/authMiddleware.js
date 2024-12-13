@@ -1,14 +1,18 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
+const User = require('../models/User'); // Asegúrate de tener el modelo de usuario
 
-exports.verifyToken = (req, res, next) => {
-  const token = req.headers["authorization"];
-  if (!token) return res.status(403).json({ message: "Token no proporcionado." });
+module.exports = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1]; // Asegurarse de obtener el token correctamente
+
+  if (!token) {
+    return res.status(401).json({ message: 'Acceso denegado. No se proporcionó un token.' });
+  }
 
   try {
-    const decoded = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET);
-    req.user = decoded;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Añadir la información del usuario a la solicitud
     next();
   } catch (error) {
-    res.status(401).json({ message: "Token inválido." });
+    return res.status(401).json({ message: 'Acceso denegado. Token inválido.' });
   }
 };

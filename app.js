@@ -3,37 +3,32 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const dbConnection = require("./utils/dbConnection");
-
-const router = express.Router();
-
-
-// Cargar variables de entorno
-dotenv.config();
+const morgan = require("morgan");
 
 // Inicializar la app
 const app = express();
+app.use(morgan("dev"));
+
+// Cargar variables de entorno
+dotenv.config();
 dbConnection(); // Conexión a MongoDB
 
 // Middlewares
 app.use(bodyParser.json());
 app.use(cors({
-    origin: 'http://localhost:3000', // replace with your Next.js frontend URL
-  }));
+    origin: 'http://localhost:3000', // Reemplaza con la URL de tu frontend de Next.js
+}));
+
+// Ruta de prueba
+app.get("/api/nueva", async (req, res) => {
+    res.send("hola");
+});
 
 // Rutas
-router.get("/api/nueva",async(req,res) => {
-    res.send("hola");
-})
-
-const authRoutes = require("./routes/authRoutes");
-const eventRoutes = require("./routes/eventRoutes");
-const reservationRoutes = require("./routes/reservationRoutes");
-const notificationRoutes = require("./routes/notificationRoutes");
-
-app.use(router)
-app.use("/api/auth", authRoutes);
-app.use("/api/events", eventRoutes);
-app.use("/api/reservations", reservationRoutes);
-app.use("/api/notifications", notificationRoutes);
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use('/api/presentaciones', require('./routes/presentacionRoutes'));
+app.use('/api/butacas', require('./routes/butacaRoutes'));
+app.use('/api/reservas', require('./routes/reservaRoutes'));
+app.use('/api/comentarios', require('./routes/comentarioRoutes'));
 
 module.exports = app;
